@@ -1,0 +1,23 @@
+<h1>Live Market Dashboard</h1>
+
+<h2>Active Producer Settings</h2>
+
+<p>
+  Instruments:
+  {{ marketService.activeSettings().instrumentCount }}
+</p>
+
+<p>
+  Updates per batch:
+  {{ marketService.activeSettings().updatesPerBatch }}
+</p>
+
+<p>
+  Batch interval:
+  {{ marketService.activeSettings().batchInterval }} ms
+</p>
+
+<p>
+  Current Run ID:
+  {{ marketService.runId() }}
+</p>

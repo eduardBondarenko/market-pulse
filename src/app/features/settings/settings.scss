@@ -1,0 +1,61 @@
+.settings {
+  max-width: 520px;
+
+  h1 {
+    margin-bottom: 8px;
+  }
+
+  p {
+    color: #6b7280;
+    margin-bottom: 24px;
+  }
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+
+  label {
+    font-weight: 500;
+  }
+
+  input {
+    padding: 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font-size: 16px;
+
+    &:focus {
+      outline: 2px solid #38bdf8;
+      outline-offset: 1px;
+    }
+  }
+}
+
+.error {
+  color: #dc2626;
+  font-size: 13px;
+}
+
+button {
+  padding: 12px 20px;
+  border: none;
+  border-radius: 6px;
+  background: #2563eb;
+  color: white;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+
+  &:disabled {
+    background: #9ca3af;
+    cursor: not-allowed;
+  }
+}
