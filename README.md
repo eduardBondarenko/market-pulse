@@ -89,6 +89,52 @@ npm run build -- --configuration production
 Build the Wasm package before building or serving the app so the expected files
 exist in `wasm/pkg/`.
 
+## Cloudflare Workers Builds deployment
+
+The `market-pulse` Worker is intended to use Cloudflare Workers Builds with the
+GitHub repository `eduardBondarenko/market-pulse` and production branch `main`.
+Connect or verify that repository and branch under the Worker’s **Settings >
+Build**. Workers Builds currently uses an Ubuntu 24.04 x86_64 image with Node.js
+and npm, but its documented preinstalled tooling does not include Rust,
+`wasm32-unknown-unknown`, or `wasm-pack`. The build script installs Rust stable,
+adds the Wasm target, and installs the pinned `wasm-pack` 0.15.0 before running
+the test and build steps.
+
+In the Worker’s **Settings > Build**, configure:
+
+| Setting | Command |
+| --- | --- |
+| Build command | `npm run build:cloudflare` |
+| Deploy command | `npx wrangler deploy` |
+
+Workers Builds installs the npm dependencies from the repository manifest and
+lockfile. The build command runs Rust tests, Angular/Vitest tests, builds the
+Wasm package, and creates the production Angular output. Wrangler then deploys
+the Worker configuration and the generated static assets. The `wrangler.jsonc`
+configuration enables SPA fallback so direct navigation to routes such as
+`/dashboard` and `/settings` serves the Angular application shell.
+
+To reproduce the sequence locally on Linux with Node.js, npm, curl, and
+build-essential available, run:
+
+```sh
+npm ci
+npm run build:cloudflare
+npx wrangler deploy
+```
+
+The last command publishes to Cloudflare and is not part of the build script.
+For configuration validation without deployment, run:
+
+```sh
+npx wrangler deploy --dry-run
+```
+
+Cloudflare documentation: [Workers Builds](https://developers.cloudflare.com/workers/ci-cd/builds/),
+[Build image](https://developers.cloudflare.com/workers/ci-cd/builds/build-image/),
+[Static Assets SPA routing](https://developers.cloudflare.com/workers/static-assets/routing/single-page-application/),
+and [Wrangler deployment](https://developers.cloudflare.com/workers/wrangler/commands/).
+
 ## Tests
 
 Run the Angular/Vitest suite and the Rust tests from the repository root:
@@ -115,14 +161,6 @@ cargo test --manifest-path wasm/Cargo.toml
 - **Guard asynchronous state:** `runId` distinguishes producer runs,
   `commandId` matches Pause/Resume acknowledgements, and `snapshotId` rejects
   duplicate or out-of-order metric snapshots.
-
-## Deployment
-
-No GitHub Actions deployment workflow is currently configured. A future
-GitHub-based deployment can use Actions to install dependencies, build Wasm,
-run the Angular and Rust tests, create the Angular production build, and publish
-the generated static site to a selected hosting provider. The hosting target,
-workflow, and any required credentials still need to be configured.
 
 ## Limitations and assumptions
 

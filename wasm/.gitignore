@@ -1,2 +1,5 @@
+# Cargo build artifacts
 /target/
+
+# Generated wasm-pack bindings and binaries
 /pkg/

@@ -5,6 +5,7 @@
     "ng": "ng",
     "start": "ng serve",
     "build": "ng build",
+    "build:cloudflare": "bash scripts/cloudflare-build.sh",
     "watch": "ng build --watch --configuration development",
     "test": "ng test"
   },
@@ -28,6 +29,7 @@
     "jsdom": "^28.0.0",
     "prettier": "^3.8.1",
     "typescript": "~5.9.2",
-    "vitest": "^4.0.8"
+    "vitest": "^4.0.8",
+    "wrangler": "^4.150.0"
   }
 }
