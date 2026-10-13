@@ -29,6 +29,20 @@ export type MarketServiceEvent =
   | { id: number; type: 'paused' | 'resumed'; runId: number }
   | { id: number; type: 'error'; runId: number; message: string };
 
+export function isValidProducerSettings(
+  settings: ProducerSettings
+): boolean {
+  return Number.isSafeInteger(settings.instrumentCount) &&
+    settings.instrumentCount >= 1 &&
+    settings.instrumentCount <= 50 &&
+    Number.isSafeInteger(settings.updatesPerBatch) &&
+    settings.updatesPerBatch >= 1 &&
+    settings.updatesPerBatch <= 1_000 &&
+    Number.isSafeInteger(settings.batchInterval) &&
+    settings.batchInterval >= 50 &&
+    settings.batchInterval <= 2_000;
+}
+
 type MarketServiceEventInput =
   | { type: 'settings-applied'; runId: number; settings: ProducerSettings }
   | { type: 'paused' | 'resumed'; runId: number }
@@ -102,6 +116,14 @@ export class MarketService {
   applySettings(settings: ProducerSettings): void {
     if (this._status() === 'disposed') {
       return;
+    }
+
+    if (!isValidProducerSettings(settings)) {
+      throw new RangeError(
+        'Invalid producer settings: instrumentCount must be an integer from 1 to 50, ' +
+        'updatesPerBatch must be an integer from 1 to 1000, and batchInterval ' +
+        'must be an integer from 50 to 2000 milliseconds.'
+      );
     }
 
     this._runId.update((id) => id + 1);

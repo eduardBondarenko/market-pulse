@@ -2,6 +2,7 @@ import { TestBed } from '@angular/core/testing';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { MarketMetrics } from '../models/market-metrics.model';
+import { ProducerSettings } from '../models/producer-settings.model';
 import { MarketService } from './market';
 import {
   MarketWorkerRequest,
@@ -462,4 +463,38 @@ describe('MarketService', () => {
     expect(service.status()).toBe('disposed');
     expect(service.lastEvent()).toBe(disposedEvent);
   });
+
+  it.each<[string, Partial<ProducerSettings>]>([
+    ['instrumentCount below minimum', { instrumentCount: 0 }],
+    ['instrumentCount above maximum', { instrumentCount: 51 }],
+    ['fractional instrumentCount', { instrumentCount: 2.5 }],
+    ['unsafe instrumentCount', { instrumentCount: Number.MAX_SAFE_INTEGER + 1 }],
+    ['non-finite instrumentCount', { instrumentCount: Number.POSITIVE_INFINITY }],
+    ['updatesPerBatch below minimum', { updatesPerBatch: 0 }],
+    ['updatesPerBatch above maximum', { updatesPerBatch: 1_001 }],
+    ['fractional updatesPerBatch', { updatesPerBatch: 10.5 }],
+    ['NaN updatesPerBatch', { updatesPerBatch: Number.NaN }],
+    ['batchInterval below minimum', { batchInterval: 49 }],
+    ['batchInterval above maximum', { batchInterval: 2_001 }],
+    ['fractional batchInterval', { batchInterval: 100.5 }]
+  ])(
+    'rejects invalid programmatic settings (%s) without changing the active run',
+    (_description, override) => {
+      const initialSettings = service.settings();
+      const initialMetrics = service.metrics();
+      const initialRunId = service.runId();
+      const initialMessageCount = worker.requests.length;
+
+      expect(() => service.applySettings({
+        ...initialSettings,
+        ...override
+      })).toThrow(RangeError);
+
+      expect(service.settings()).toBe(initialSettings);
+      expect(service.metrics()).toBe(initialMetrics);
+      expect(service.runId()).toBe(initialRunId);
+      expect(worker.requests).toHaveLength(initialMessageCount);
+    }
+  );
+
 });

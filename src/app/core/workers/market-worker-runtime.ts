@@ -64,15 +64,34 @@ export function createMarketWorkerRuntime(
     }
 
     const update = value as Record<string, unknown>;
-    return (
-      typeof update['instrument'] === 'string' &&
-      typeof update['priceCents'] === 'number' &&
-      typeof update['tradeQuantity'] === 'number' &&
-      typeof update['bidCents'] === 'number' &&
-      typeof update['askCents'] === 'number' &&
-      typeof update['bidQuantity'] === 'number' &&
-      typeof update['askQuantity'] === 'number'
-    );
+    const price = update['priceCents'];
+    const tradeQuantity = update['tradeQuantity'];
+    const bid = update['bidCents'];
+    const ask = update['askCents'];
+    const bidQuantity = update['bidQuantity'];
+    const askQuantity = update['askQuantity'];
+
+    return typeof update['instrument'] === 'string' &&
+      update['instrument'].length > 0 &&
+      typeof price === 'number' &&
+      Number.isSafeInteger(price) &&
+      price > 0 &&
+      typeof tradeQuantity === 'number' &&
+      Number.isSafeInteger(tradeQuantity) &&
+      tradeQuantity > 0 &&
+      typeof bid === 'number' &&
+      Number.isSafeInteger(bid) &&
+      bid > 0 &&
+      typeof ask === 'number' &&
+      Number.isSafeInteger(ask) &&
+      bid < ask &&
+      (price === bid || price === ask) &&
+      typeof bidQuantity === 'number' &&
+      Number.isSafeInteger(bidQuantity) &&
+      bidQuantity >= 0 &&
+      typeof askQuantity === 'number' &&
+      Number.isSafeInteger(askQuantity) &&
+      askQuantity >= 0;
   }
 
   function clearTimer(): void {

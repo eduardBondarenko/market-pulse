@@ -90,6 +90,16 @@ function createBindings(options?: {
   };
 }
 
+const validUpdate = {
+  instrument: 'ALFA',
+  priceCents: 10_000,
+  tradeQuantity: 2,
+  bidCents: 9_999,
+  askCents: 10_000,
+  bidQuantity: 5,
+  askQuantity: 7
+};
+
 describe('Market Worker runtime lifecycle', () => {
   beforeEach(() => vi.useFakeTimers());
 
@@ -291,5 +301,59 @@ describe('Market Worker runtime lifecycle', () => {
       error: expect.stringContaining('JSON')
     }));
     expect(vi.getTimerCount()).toBe(0);
+  });
+
+  it.each([
+    ['NaN numeric JSON token', '{"instrument":"ALFA","priceCents":NaN,"tradeQuantity":1,"bidCents":9999,"askCents":10000,"bidQuantity":1,"askQuantity":1}'],
+    ['infinite price encoded as a JSON exponent', '{"instrument":"ALFA","priceCents":1e999,"tradeQuantity":1,"bidCents":9999,"askCents":10000,"bidQuantity":1,"askQuantity":1}'],
+    ['null price', JSON.stringify({ ...validUpdate, priceCents: null })],
+    ['fractional price', JSON.stringify({ ...validUpdate, priceCents: 10_000.5 })],
+    ['fractional bid', JSON.stringify({ ...validUpdate, bidCents: 9_999.5 })],
+    ['fractional ask', JSON.stringify({ ...validUpdate, askCents: 10_000.5 })],
+    ['unsafe integer price', JSON.stringify({ ...validUpdate, priceCents: Number.MAX_SAFE_INTEGER + 1 })],
+    ['fractional trade quantity', JSON.stringify({ ...validUpdate, tradeQuantity: 1.5 })],
+    ['zero trade quantity', JSON.stringify({ ...validUpdate, tradeQuantity: 0 })],
+    ['negative trade quantity', JSON.stringify({ ...validUpdate, tradeQuantity: -1 })],
+    ['fractional bid quantity', JSON.stringify({ ...validUpdate, bidQuantity: 1.5 })],
+    ['negative bid quantity', JSON.stringify({ ...validUpdate, bidQuantity: -1 })],
+    ['negative ask quantity', JSON.stringify({ ...validUpdate, askQuantity: -1 })],
+    ['non-positive bid', JSON.stringify({ ...validUpdate, bidCents: 0 })],
+    ['crossed bid and ask', JSON.stringify({ ...validUpdate, bidCents: 10_000, askCents: 9_999 })],
+    ['trade price outside bid and ask', JSON.stringify({ ...validUpdate, priceCents: 10_001 })]
+  ])('rejects malformed Wasm update: %s', async (_description, batchJson) => {
+    const { handle, messages } = createHarness(async () =>
+      createBindings({ generateBatch: () => batchJson })
+    );
+
+    await handle(startRequest(1));
+    await vi.advanceTimersByTimeAsync(50);
+
+    expect(messages).toContainEqual(expect.objectContaining({
+      type: 'ERROR',
+      runId: 1,
+      error: expect.any(String)
+    }));
+    expect(messages.some((message) => message.type === 'BATCH')).toBe(false);
+    expect(vi.getTimerCount()).toBe(0);
+  });
+
+  it('rejects the complete batch before accumulating any valid prefix', async () => {
+    const batchJson = JSON.stringify([
+      validUpdate,
+      { ...validUpdate, tradeQuantity: -1 }
+    ]);
+    const { handle, messages } = createHarness(async () =>
+      createBindings({ generateBatch: () => batchJson })
+    );
+
+    await handle(startRequest(1));
+    await vi.advanceTimersByTimeAsync(50);
+
+    expect(messages.find((message) => message.type === 'READY')).toMatchObject({
+      type: 'READY',
+      metrics: [expect.objectContaining({ volume: 0 })]
+    });
+    expect(messages.some((message) => message.type === 'BATCH')).toBe(false);
+    expect(messages.some((message) => message.type === 'ERROR')).toBe(true);
   });
 });
