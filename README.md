@@ -1,5 +1,8 @@
 # Market Pulse
 
+[**Live Demo**](https://market-pulse.ed-bondarenkojr.workers.dev/)
+| [GitHub Repository](https://github.com/eduardBondarenko/market-pulse)
+
 Market Pulse is a responsive Angular dashboard for viewing a stream of
 simulated financial-market updates. A Rust/WebAssembly generator produces
 events in a Web Worker; the Angular application displays their cumulative
@@ -91,14 +94,18 @@ exist in `wasm/pkg/`.
 
 ## Cloudflare Workers Builds deployment
 
-The `market-pulse` Worker is intended to use Cloudflare Workers Builds with the
-GitHub repository `eduardBondarenko/market-pulse` and production branch `main`.
-Connect or verify that repository and branch under the Worker’s **Settings >
-Build**. Workers Builds currently uses an Ubuntu 24.04 x86_64 image with Node.js
-and npm, but its documented preinstalled tooling does not include Rust,
-`wasm32-unknown-unknown`, or `wasm-pack`. The build script installs Rust stable,
-adds the Wasm target, and installs the pinned `wasm-pack` 0.15.0 before running
-the test and build steps.
+The deployed `market-pulse` Worker is connected to
+[eduardBondarenko/market-pulse](https://github.com/eduardBondarenko/market-pulse)
+on the production branch `main`. Cloudflare Workers Builds automatically runs
+the build and deploy pipeline when changes are pushed to that branch.
+
+The pipeline in `scripts/cloudflare-build.sh` installs Rust stable and the
+`wasm32-unknown-unknown` target, ensures `wasm-pack` 0.15.0 is available, runs
+the Rust tests, runs the Angular/Vitest tests, builds the Wasm package, and
+creates the production Angular build. Workers Builds then runs Wrangler to
+deploy the Worker and its static assets. The Wrangler configuration points to
+`./dist/market-pulse/browser` and enables SPA fallback for direct navigation to
+routes such as `/dashboard` and `/settings`.
 
 In the Worker’s **Settings > Build**, configure:
 
@@ -108,11 +115,7 @@ In the Worker’s **Settings > Build**, configure:
 | Deploy command | `npx wrangler deploy` |
 
 Workers Builds installs the npm dependencies from the repository manifest and
-lockfile. The build command runs Rust tests, Angular/Vitest tests, builds the
-Wasm package, and creates the production Angular output. Wrangler then deploys
-the Worker configuration and the generated static assets. The `wrangler.jsonc`
-configuration enables SPA fallback so direct navigation to routes such as
-`/dashboard` and `/settings` serves the Angular application shell.
+lockfile before running the configured build command.
 
 To reproduce the sequence locally on Linux with Node.js, npm, curl, and
 build-essential available, run:
