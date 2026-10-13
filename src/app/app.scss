@@ -1,4 +1,14 @@
+:host {
+  display: flex;
+  height: 100vh;
+  height: 100dvh;
+  min-height: 0;
+  flex-direction: column;
+  overflow: hidden;
+}
+
 .header {
+  flex: 0 0 auto;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -32,7 +42,19 @@
 }
 
 .content {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-height: 0;
+  min-width: 0;
+  width: 100%;
   max-width: 1400px;
+  box-sizing: border-box;
   margin: 0 auto;
   padding: 32px;
+  overflow: hidden;
+}
+
+router-outlet {
+  display: none;
 }

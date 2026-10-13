@@ -28,6 +28,16 @@
               {
                 "glob": "**/*",
                 "input": "public"
+              },
+              {
+                "glob": "*.js",
+                "input": "wasm/pkg",
+                "output": "assets/market-pulse-wasm"
+              },
+              {
+                "glob": "*.wasm",
+                "input": "wasm/pkg",
+                "output": "assets/market-pulse-wasm"
               }
             ],
             "styles": [

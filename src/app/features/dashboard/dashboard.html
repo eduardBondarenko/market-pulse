@@ -1,23 +1,118 @@
-<h1>Live Market Dashboard</h1>
+<section class="dashboard" aria-labelledby="dashboard-title">
+  <header class="dashboard__header">
+    <div>
+      <h1 id="dashboard-title">Live Market Dashboard</h1>
+      <p class="dashboard__run">
+        Run {{ marketService.runId() }}
+        <span aria-hidden="true">·</span>
+        {{ marketService.settings().instrumentCount }} instruments
+      </p>
+    </div>
 
-<h2>Active Producer Settings</h2>
+    <div class="dashboard__controls">
+      <span
+        class="status"
+        [attr.data-status]="marketService.status()"
+        role="status"
+        aria-live="polite"
+      >
+        <span class="status__indicator" aria-hidden="true"></span>
+        {{ statusLabel() }}
+      </span>
 
-<p>
-  Instruments:
-  {{ marketService.activeSettings().instrumentCount }}
-</p>
+      <button
+        type="button"
+        class="toggle-button"
+        [disabled]="!canToggleUpdates()"
+        [attr.aria-label]="
+          marketService.status() === 'paused'
+            ? 'Resume market updates'
+            : 'Pause market updates'
+        "
+        (click)="toggleUpdates()"
+      >
+        {{ marketService.status() === 'paused' ? 'Resume' : 'Pause' }}
+      </button>
+    </div>
+  </header>
 
-<p>
-  Updates per batch:
-  {{ marketService.activeSettings().updatesPerBatch }}
-</p>
+  @if (marketService.status() === 'error' && marketService.error()) {
+    <p class="dashboard__error" role="alert">
+      Market data is unavailable: {{ marketService.error() }}
+    </p>
+  }
 
-<p>
-  Batch interval:
-  {{ marketService.activeSettings().batchInterval }} ms
-</p>
+  <div
+    class="table-scroll"
+    role="region"
+    aria-label="Live market data"
+    [style.max-height.px]="tableMaxHeight()"
+  >
+    @if (rows().length > 0) {
+      <div
+        class="table-horizontal-scroll"
+        role="table"
+        aria-label="Live market data by instrument"
+        [attr.aria-rowcount]="rows().length + 1"
+        aria-colcount="6"
+      >
+        <div class="market-grid">
+          <div class="market-header" role="row">
+            <div role="columnheader">Instrument</div>
+            <div role="columnheader">Last price</div>
+            <div role="columnheader">Bid-ask spread</div>
+            <div role="columnheader">Trading volume</div>
+            <div role="columnheader">VWAP</div>
+            <div role="columnheader">Order-book imbalance</div>
+          </div>
 
-<p>
-  Current Run ID:
-  {{ marketService.runId() }}
-</p>
+          <cdk-virtual-scroll-viewport
+            class="market-viewport"
+            role="rowgroup"
+            [itemSize]="itemSize()"
+            [minBufferPx]="minBufferPx()"
+            [maxBufferPx]="maxBufferPx()"
+            [attr.aria-label]="'Market instruments, ' + rows().length + ' rows'"
+          >
+            <div
+              class="market-row"
+              role="row"
+              *cdkVirtualFor="let row of rows(); let index = index; trackBy: trackByInstrument"
+              [attr.aria-rowindex]="index + 2"
+            >
+              <div role="rowheader">{{ row.instrument }}</div>
+              <div role="cell">
+                <span class="market-row__label" aria-hidden="true">Last price</span>
+                <span>{{ row.lastPrice }}</span>
+              </div>
+              <div role="cell">
+                <span class="market-row__label" aria-hidden="true">Bid-ask spread</span>
+                <span>{{ row.spread }}</span>
+              </div>
+              <div role="cell">
+                <span class="market-row__label" aria-hidden="true">Trading volume</span>
+                <span>{{ row.volume }}</span>
+              </div>
+              <div role="cell">
+                <span class="market-row__label" aria-hidden="true">VWAP</span>
+                <span>{{ row.vwap }}</span>
+              </div>
+              <div role="cell">
+                <span class="market-row__label" aria-hidden="true">Order-book imbalance</span>
+                <span>{{ row.imbalance }}</span>
+              </div>
+            </div>
+          </cdk-virtual-scroll-viewport>
+        </div>
+      </div>
+    } @else {
+      <p class="empty-state">
+        @if (marketService.status() === 'error') {
+          Market metrics could not be loaded.
+        } @else {
+          Initializing market instruments…
+        }
+      </p>
+    }
+  </div>
+</section>

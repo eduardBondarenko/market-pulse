@@ -1,0 +1,110 @@
+.toast-container {
+  position: fixed;
+  z-index: 1000;
+  top: 16px;
+  right: 16px;
+  display: flex;
+  flex-direction: column;
+  width: min(400px, calc(100vw - 32px));
+  max-height: calc(100vh - 32px);
+  overflow-x: hidden;
+  overflow-y: auto;
+  pointer-events: none;
+}
+
+.toast-slot {
+  display: grid;
+  grid-template-rows: 1fr;
+  flex: 0 0 auto;
+  padding-bottom: 10px;
+  transition:
+    grid-template-rows 250ms ease-in,
+    padding-bottom 250ms ease-in;
+
+  &--exiting {
+    grid-template-rows: 0fr;
+    padding-bottom: 0;
+    overflow: hidden;
+  }
+}
+
+.toast {
+  min-height: 0;
+  overflow: hidden;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 12px 14px 16px;
+  border: 1px solid rgb(148 163 184 / 24%);
+  border-left: 4px solid #15803d;
+  border-radius: 6px;
+  background: #ffffff;
+  box-shadow:
+    0 1px 2px rgb(17 24 39 / 8%),
+    0 6px 18px rgb(17 24 39 / 9%);
+  color: #111827;
+  pointer-events: auto;
+  opacity: 1;
+  transform: translateX(0);
+  transition:
+    opacity 350ms cubic-bezier(0.22, 1, 0.36, 1),
+    transform 350ms cubic-bezier(0.22, 1, 0.36, 1);
+
+  @starting-style {
+    opacity: 0;
+    transform: translateX(60px);
+  }
+
+  &--exiting {
+    opacity: 0;
+    transform: translateX(60px);
+    pointer-events: none;
+    transition-duration: 250ms;
+    transition-timing-function: ease-in;
+  }
+
+  p {
+    margin: 0;
+    line-height: 1.45;
+  }
+
+  &.toast--warning {
+    border-left-color: #b45309;
+  }
+
+  &.toast--error {
+    border-left-color: #b91c1c;
+  }
+}
+
+.toast__close {
+  flex: 0 0 auto;
+  display: grid;
+  width: 28px;
+  height: 28px;
+  place-items: center;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: #374151;
+  font-size: 1.35rem;
+  line-height: 1;
+  cursor: pointer;
+
+  &:hover {
+    background: #f3f4f6;
+  }
+
+  &:focus-visible {
+    outline: 3px solid #2563eb;
+    outline-offset: 1px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .toast-slot,
+  .toast {
+    transition-duration: 1ms;
+  }
+}

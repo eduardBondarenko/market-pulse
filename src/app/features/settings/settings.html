@@ -1,30 +1,34 @@
-<section class="settings">
-  <h1>Producer Settings</h1>
+<section class="settings" aria-labelledby="settings-title">
+  <h1 id="settings-title">Producer Settings</h1>
 
   <p>
-    Configure the market data generator.
-    Changes take effect only after clicking Apply.
+    Configure the market data generator. Changes take effect after applying
+    them.
   </p>
 
-  <form [formGroup]="form" (ngSubmit)="apply()">
-
+  <form [formGroup]="form" (ngSubmit)="apply()" novalidate>
     <div class="field">
       <label for="instrumentCount">Instrument count</label>
-
       <input
         id="instrumentCount"
         type="number"
         step="1"
         min="1"
         max="50"
+        required
+        [attr.aria-invalid]="
+          form.controls.instrumentCount.invalid &&
+          (form.controls.instrumentCount.dirty || form.controls.instrumentCount.touched)
+        "
+        aria-describedby="instrumentCount-error"
         formControlName="instrumentCount"
       />
-
       @if (
         form.controls.instrumentCount.invalid &&
-        form.controls.instrumentCount.touched
+        (form.controls.instrumentCount.dirty ||
+          form.controls.instrumentCount.touched)
       ) {
-        <span class="error">
+        <span class="error" id="instrumentCount-error">
           Enter an integer between 1 and 50.
         </span>
       }
@@ -32,21 +36,26 @@
 
     <div class="field">
       <label for="updatesPerBatch">Updates per batch</label>
-
       <input
         id="updatesPerBatch"
         type="number"
         step="1"
         min="1"
         max="1000"
+        required
+        [attr.aria-invalid]="
+          form.controls.updatesPerBatch.invalid &&
+          (form.controls.updatesPerBatch.dirty || form.controls.updatesPerBatch.touched)
+        "
+        aria-describedby="updatesPerBatch-error"
         formControlName="updatesPerBatch"
       />
-
       @if (
         form.controls.updatesPerBatch.invalid &&
-        form.controls.updatesPerBatch.touched
+        (form.controls.updatesPerBatch.dirty ||
+          form.controls.updatesPerBatch.touched)
       ) {
-        <span class="error">
+        <span class="error" id="updatesPerBatch-error">
           Enter an integer between 1 and 1000.
         </span>
       }
@@ -54,28 +63,33 @@
 
     <div class="field">
       <label for="batchInterval">Batch interval (ms)</label>
-
       <input
         id="batchInterval"
         type="number"
         step="1"
         min="50"
         max="2000"
+        required
+        [attr.aria-invalid]="
+          form.controls.batchInterval.invalid &&
+          (form.controls.batchInterval.dirty || form.controls.batchInterval.touched)
+        "
+        aria-describedby="batchInterval-error"
         formControlName="batchInterval"
       />
-
       @if (
         form.controls.batchInterval.invalid &&
-        form.controls.batchInterval.touched
+        (form.controls.batchInterval.dirty ||
+          form.controls.batchInterval.touched)
       ) {
-        <span class="error">
+        <span class="error" id="batchInterval-error">
           Enter an integer between 50 and 2000.
         </span>
       }
     </div>
 
-    <button type="submit" [disabled]="form.invalid">
-      Apply
+    <button type="submit" [disabled]="!canApply()">
+      {{ isApplying() ? 'Applying…' : 'Apply' }}
     </button>
   </form>
 </section>

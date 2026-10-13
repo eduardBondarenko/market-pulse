@@ -1,61 +1,122 @@
 .settings {
-  max-width: 520px;
+  width: min(100%, 760px);
+  margin: 0 auto;
+  padding: clamp(20px, 4vw, 36px);
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  background: #ffffff;
+  box-shadow: 0 12px 32px rgb(17 24 39 / 6%);
+  box-sizing: border-box;
 
   h1 {
-    margin-bottom: 8px;
+    margin: 0 0 8px;
+    color: #111827;
+    font-size: clamp(1.5rem, 3vw, 2rem);
   }
 
   p {
-    color: #6b7280;
-    margin-bottom: 24px;
+    margin: 0 0 28px;
+    color: #4b5563;
+    line-height: 1.5;
   }
 }
 
 form {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 22px 20px;
 }
 
 .field {
   display: flex;
+  min-width: 0;
   flex-direction: column;
-  gap: 8px;
+  gap: 7px;
 
   label {
-    font-weight: 500;
+    color: #374151;
+    font-size: 0.9rem;
+    font-weight: 600;
   }
 
   input {
-    padding: 12px;
+    width: 100%;
+    min-height: 48px;
+    padding: 10px 12px;
     border: 1px solid #d1d5db;
-    border-radius: 6px;
+    border-radius: 8px;
+    background: #ffffff;
+    color: #111827;
     font-size: 16px;
+    box-sizing: border-box;
+    transition: border-color 150ms ease, box-shadow 150ms ease;
 
-    &:focus {
-      outline: 2px solid #38bdf8;
+    &:focus-visible {
+      border-color: #2563eb;
+      outline: 3px solid rgb(37 99 235 / 20%);
       outline-offset: 1px;
+    }
+
+    &[aria-invalid='true'] {
+      border-color: #b91c1c;
     }
   }
 }
 
 .error {
-  color: #dc2626;
-  font-size: 13px;
+  color: #991b1b;
+  font-size: 0.8rem;
+  line-height: 1.4;
 }
 
 button {
-  padding: 12px 20px;
-  border: none;
-  border-radius: 6px;
-  background: #2563eb;
-  color: white;
-  font-size: 15px;
+  grid-column: 1 / -1;
+  justify-self: end;
+  min-width: 120px;
+  min-height: 44px;
+  padding: 10px 20px;
+  border: 0;
+  border-radius: 8px;
+  background: #1d4ed8;
+  color: #ffffff;
+  font: inherit;
   font-weight: 600;
   cursor: pointer;
+  transition: background-color 150ms ease;
+
+  &:hover:not(:disabled) {
+    background: #1e40af;
+  }
+
+  &:focus-visible {
+    outline: 3px solid #93c5fd;
+    outline-offset: 2px;
+  }
 
   &:disabled {
     background: #9ca3af;
     cursor: not-allowed;
+  }
+}
+
+@media (max-width: 700px) {
+  .settings {
+    padding: 22px;
+  }
+
+  form {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 18px;
+  }
+
+  button {
+    width: 100%;
+  }
+}
+
+@media (max-width: 420px) {
+  .settings {
+    padding: 18px 14px;
+    border-radius: 10px;
   }
 }
